@@ -474,7 +474,9 @@ components:
           type: integer
         location_id:
           type: integer
-        description:
+        title:
+          type: string
+        body:
           type: string
         photos:
           type: array
@@ -520,9 +522,15 @@ components:
           readOnly: true
         name:
           type: string
+        description:
+          type: string
         latitude:
           type: number
           format: float
         longitude:
           type: number
           format: float
+        photos:
+          type: array
+          items:
+            type: string
