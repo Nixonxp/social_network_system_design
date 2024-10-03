@@ -11,6 +11,7 @@ tags:
   - name: Comments
   - name: Subscriptions
   - name: Locations
+  - name: Photos
 
 servers:
   - url: http://api.travelnetwork.com/v1
@@ -82,18 +83,12 @@ paths:
         '500':
           description: Server error
 
-  /posts/user/{user_id}/:
+  /posts/:
     get:
-      summary: Get posts by a user
+      summary: Get posts by user id or location id
       tags:
         - Posts
       parameters:
-        - in: path
-          name: user_id
-          schema:
-            type: integer
-          required: true
-          description: ID of the user
         - in: query
           name: page
           schema:
@@ -106,9 +101,22 @@ paths:
             type: integer
             default: 10
           description: Number of items per page
+        - in: query
+          name: entity_type
+          schema:
+            type: string
+            enum: [ user, location ]
+          required: true
+          description: Type of entity to filter posts by
+        - in: query
+          name: entity_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the entity to filter posts by
       responses:
         '200':
-          description: List of posts by the user
+          description: List of posts
           content:
             application/json:
               schema:
@@ -119,8 +127,6 @@ paths:
           description: Bad Request
         '500':
           description: Server error
-
-  /posts/:
     post:
       summary: Create a new post
       tags:
@@ -144,6 +150,7 @@ paths:
           description: Validation exception
         '500':
           description: Server error
+  /posts/feed:
     get:
       summary: Get user's feed
       tags:
@@ -246,6 +253,42 @@ paths:
           description: Server error
 
   /posts/{post_id}/ratings:
+    get:
+      summary: Get post ratings
+      tags:
+        - Reactions
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the post to rate
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of reactions from users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rating'
+        '400':
+          description: Bad Request
+        '500':
+          description: Server error
     post:
       summary: Rate a post
       tags:
@@ -305,6 +348,18 @@ paths:
             type: integer
           required: true
           description: ID of the post
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
       responses:
         '200':
           description: List of comments for the post
@@ -350,31 +405,6 @@ paths:
           description: Server error
 
   /comments/{comment_id}:
-    get:
-      summary: Get specific comment
-      description: Method gets single comment for the authenticated user
-      tags:
-        - Comments
-      parameters:
-        - in: path
-          name: comment_id
-          schema:
-            type: integer
-          required: true
-          description: ID of the comment
-      responses:
-        '200':
-          description: Get comment successfull
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
-        '400':
-          description: Bad Request
-        '404':
-          description: Not Found
-        '500':
-          description: Server error
     delete:
       summary: Delete comment
       tags:
@@ -469,33 +499,64 @@ paths:
           description: Bad Request
         '500':
           description: Server error
-
-  /locations/{location_id}/posts:
-    get:
-      summary: Get posts from a location
+  /photos/upload:
+    post:
+      summary: Upload a photo
       tags:
-        - Locations
-      parameters:
-        - in: path
-          name: location_id
-          schema:
-            type: integer
-          required: true
-          description: ID of the location
+        - Photos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: The photo to upload
       responses:
-        '200':
-          description: List of posts from the location
+        '201':
+          description: Photo uploaded successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: The URL of the uploaded photo
         '400':
           description: Bad Request
         '500':
           description: Server error
 
+  /photos/{photo_url}:
+    get:
+      summary: Get a photo by URL
+      tags:
+        - Photos
+      parameters:
+        - in: path
+          name: photo_url
+          schema:
+            type: string
+          required: true
+          description: URL of the photo to retrieve
+      responses:
+        '200':
+          description: Successfully retrieved photo
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+        '404':
+          description: Photo not found
+        '500':
+          description: Server error
 components:
   schemas:
     User:
