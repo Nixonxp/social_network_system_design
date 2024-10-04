@@ -511,10 +511,13 @@ paths:
             schema:
               type: object
               properties:
-                photo:
-                  type: string
-                  format: binary
-                  description: The photo to upload
+                photos:
+                  type: array
+                  maximum: 3
+                  items:
+                    type: string
+                    format: binary
+                    description: The photo to upload
       responses:
         '201':
           description: Photo uploaded successfully
@@ -523,9 +526,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  url:
-                    type: string
-                    description: The URL of the uploaded photo
+                  urls:
+                    type: array
+                    items:
+                      type: string
+                      description: The URL of the uploaded photo
         '400':
           description: Bad Request
         '500':
