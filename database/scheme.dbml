@@ -52,10 +52,16 @@ Table locations {
   created_at timestamp
 }
 
-Ref: posts.user_id > users.id // many-to-one
+Table blob_storage {
+  data bynary
+}
+
+Ref: posts.user_id > users.id
 Ref: posts.location_id > locations.id
+Ref: posts.photos > blob_storage.data
 
 Ref: users.id < follows.following_user_id
+Ref: users.profile_picture > blob_storage.data
 
 Ref: users.id < follows.followed_user_id
 
@@ -65,3 +71,4 @@ Ref: ratings.post_id > posts.id
 Ref: comments.user_id > users.id
 Ref: comments.post_id > posts.id
 
+Ref: locations.photos > blob_storage.data
