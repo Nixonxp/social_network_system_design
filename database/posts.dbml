@@ -1,0 +1,11 @@
+// db type - MongoDB
+
+Table posts {
+  id uuid [primary key]
+  title varchar
+  body text [note: 'Content of the post']
+  user_id uuid
+  location_id uuid
+  photos varchar[]
+  created_at timestamp
+}

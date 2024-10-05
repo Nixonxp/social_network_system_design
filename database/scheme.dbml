@@ -2,13 +2,13 @@
 // Docs: https://dbml.dbdiagram.io/docs
 
 Table follows {
-  following_user_id integer
-  followed_user_id integer
+  following_user_id uuid
+  followed_user_id uuid
   created_at timestamp
 }
 
 Table users {
-  id integer [primary key]
+  id uuid [primary key]
   first_name varchar
   last_name varchar
   email varchar
@@ -17,38 +17,35 @@ Table users {
 }
 
 Table posts {
-  id integer [primary key]
+  id uuid [primary key]
   title varchar
   body text [note: 'Content of the post']
-  user_id integer
-  location_id integer
+  user_id uuid
+  location_id uuid
   photos varchar[]
   created_at timestamp
 }
 
 Table ratings {
-  id integer [primary key]
-  user_id integer
-  post_id integer
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
   rating integer [note: 'min:1 max:5']
   created_at timestamp
 }
 
 Table comments {
-  id integer [primary key]
-  user_id integer
-  post_id integer
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
   text text
   created_at timestamp
 }
 
 Table locations {
-  id integer [primary key]
+  id uuid [primary key]
   name varchar
-  description text
-  latitude float
-  longitude float
-  photos varchar[]
+  geometry geometry
   created_at timestamp
 }
 
@@ -70,5 +67,3 @@ Ref: ratings.post_id > posts.id
 
 Ref: comments.user_id > users.id
 Ref: comments.post_id > posts.id
-
-Ref: locations.photos > blob_storage.data

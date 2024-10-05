@@ -1,0 +1,9 @@
+// db type - MongoDB
+
+Table comments {
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
+  text text
+  created_at timestamp
+}

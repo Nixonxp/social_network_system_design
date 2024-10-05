@@ -36,6 +36,7 @@ RPS (чтение) загрузка ленты постов:
     Кол-во просмотров постов на сессию = 20
     RPS = 10 000 000 * 3 * 20 / 86 400 ~= 7000 
 
+
 #### Комментарии
 RPS (запись) добавление комментариев:
 
@@ -66,14 +67,26 @@ RPS (запись) подписка на пользователей:
 
     DAU = 10 000 000
     Среднее кол-во подписок на пользователей в месяц = 3
-    RPS = 10 000 000 * 3 / 86 400 / 7 ~= 50 
+    RPS = 10 000 000 * 3 / 86 400 / 7 ~= 50
 
-#### Поиск
+#### Локации
+RPS (запись) добавление мест (такое же что добавление постами):
+
+    DAU = 10 000 000
+    Кол-во постов в день = 20
+    RPS = 10 000 000 * 20 / 86 400 ~= 2314 
+
 RPS (чтение) поиск популярных мест:
 
     DAU = 10 000 000
     Среднее кол-во поиска в день = 1
     RPS = 10 000 000 / 86 400 ~= 115 
+
+#### Пользователи
+RPS (запись) добавление пользователей:
+
+    DAU = 10 000 000
+    RPS = 10 000 000 / 365 / 86 400 ~= 0.32 
 
 RPS (чтение) поиск пользователей:
 
@@ -83,241 +96,248 @@ RPS (чтение) поиск пользователей:
 
 ### 4. Оценка дисков:
 #### Оценка на 1 запись по таблицам БД
-Ориентировочно 1 фото в хранилище весит 300 кб
+Ориентировочно 1 фото в хранилище весит 800 кб
 
     Table follows {
-        following_user_id (8 byte)
-        followed_user_id  (8 byte)
+        following_user_id (16 byte)
+        followed_user_id  (16 byte)
         created_at (8 byte)
-    } (24 byte)
+    } (32 byte)
     
     Table users {
-        id (8 byte)
+        id (16 byte)
         first_name (100 byte)
         last_name (100 byte)
         email (100 byte)
-        profile_picture (100 byte) (100 000 byte - S3 storage)
+        profile_picture (100 byte) + (800 Kb - S3 blob storage)
         created_at (8 byte)
-    } (416 byte)
+    } (424 byte) - 800.424 Kb with pictures 
     
     Table posts {
-        id  (8 byte)
+        id  (16 byte)
         title (100 byte)
         body (1000 byte)
-        user_id (8 byte)
-        location_id (8 byte)
-        photos (100 * 3 = 300 byte) (300 000 byte - S3 storage)
+        user_id (16 byte)
+        location_id (16 byte)
+        photos (100 * 3 max photos = 300 byte) (2.4Mb - S3 blob storage)
         created_at (8 byte)
-    } (1432 byte)
+    } (1456 byte) - 2.4 Mb with pictures 
     
     Table ratings {
-        id (8 byte)
-        user_id (8 byte)
-        post_id (8 byte)
+        id (16 byte)
+        user_id (16 byte)
+        post_id (16 byte)
         rating (8 byte)
         created_at (8 byte)
-    } (40 byte)
+    } (64 byte)
     
     Table comments {
-        id (8 byte)
-        user_id (8 byte)
-        post_id (8 byte)
+        id (16 byte)
+        user_id (16 byte)
+        post_id (16 byte)
         text (500 byte)
         created_at (8 byte)
-    } (532 byte)
+    } (556 byte)
     
     Table locations {
-        id (8 byte)
+        id (16 byte)
         name (100 byte)
-        description (300 byte)
-        latitude (8 byte)
-        longitude (8 byte)
-        photos (100 * 3 = 300 byte) (300 000 byte - S3 storage)
+        geometry (48 byte)
         created_at (8 byte)
-    } (732 byte)
+    } (172 byte)
 
 #### Оценка трафика и дисков 1 год
 #### Посты
-RPS (запись) добавление постов:
+RPS (запись) добавление постов (с картинками):
 
     RPS = 2314
-    Traffic = 2314 * 1432 ~= 3,3 MB/s
+    Traffic = 2314 * 2.4Mb ~= 5,553 GB/s
 
 RPS (чтение) загрузка ленты постов:
 
-    RPS ~= 7000 
-    Traffic = 7000 * 1432 ~= 10 MB/s
+    RPS ~= 7000
+    Traffic = 7000 * 2.4Mb ~= 16.8 GB/s
 
 Итого трафик:
 
-    Traffic: 13,3 MB/s
+    Traffic: 22.353 GB/s
     IOPS: 9314
-    Capacity: 13,3 * 86400 * 365 = 419 TB
+    Capacity: 5,553 * 86400 * 365 = 175 PB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 419ТБ / 4ТБ = 104.75
-    Disks_for_throughput = 13.3 МБ/с / 100 МБ/с = 0.133
+    Disks_for_capacity = 175 PB / 32ТБ = 5468.75
+    Disks_for_throughput = 22.353 ГБ/с / 100 МБ/с = 223.53
     Disks_for_iops = 9314 / 100 = 93.14
-    Disks = max(ceil(104.75), ceil(0.133), ceil(93.14)) = 105
+    Disks = max(ceil(5468.75), ceil(223.53), ceil(93.14)) = 5469
 
     SSD (SATA) 
-    Disks_for_capacity = 419ТБ / 50ТБ = 8.38
-    Disks_for_throughput = 13.3 МБ/с / 500 МБ/с = 0.0266
+    Disks_for_capacity = 175 PB / 100ТБ = 1750
+    Disks_for_throughput = 22.353 ГБ/с  / 500 МБ/с = 44.706
     Disks_for_iops = 9314 / 1000 = 9.314
-    Disks = max(ceil(8.38), ceil(0.0266), ceil(9.314)) = 10
+    Disks = max(ceil(1750), ceil(44.706), ceil(9.314)) = 1750
 
     SSD (nVME)
-    Disks_for_capacity = 419ТБ / 30ТБ = 13.9
-    Disks_for_throughput = 13.3 МБ/с / 3000 МБ/с = 0.0004
+    Disks_for_capacity = 175 PB / 30ТБ = 5833.3
+    Disks_for_throughput = 22.353 ГБ/с  / 3000 МБ/с = 7.4
     Disks_for_iops = 9314 / 10000 = 0.9314
-    Disks = max(ceil(13.9), ceil(0.0004), ceil(0.9314)) = 14
+    Disks = max(ceil(5833.3), ceil(7.4), ceil(0.9314)) = 5833.3
 
-Предпочтительная система ранения SSD (SATA) из 10 дисков по 50 ГБ
+Предпочтительная система ранения SSD (SATA) из 1750 дисков по 100ТБ
 
 #### Комментарии
 RPS (запись) добавление комментариев:
 
     RPS ~= 1050
-    Traffic = 1050 * 532 ~= 0,55 MB/s
+    Traffic = 1050 * 556 B ~= 0,583 MB/s
 
 RPS (чтение) чтение комментариев:
 
     RPS ~= 8700
-    Traffic = 8700 * 532 ~= 4,6 MB/s
+    Traffic = 8700 * 556 ~= 4,837 MB/s
 
 Итого трафик:
 
-    Traffic: 5,1 MB/s
+    Traffic: 5,42 MB/s
     IOPS: 9750
-    Capacity: 5,1 * 86400 * 365 = 160 TB
+    Capacity: 0,583 MB/s * 86400 * 365 = 18.3 ТB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 160ТБ / 2ТБ = 80
-    Disks_for_throughput = 5,1 МБ/с / 100 МБ/с = 0.051
+    Disks_for_capacity = 18.3 ТB / 2ТБ = 9.15
+    Disks_for_throughput = 5,42 MB/s / 100 МБ/с = 0.0542
     Disks_for_iops = 9750 / 100 = 97.50
-    Disks = max(ceil(80), ceil(0.051), ceil(97.50)) = 98
+    Disks = max(ceil(9.15), ceil(0.0542), ceil(97.50)) = 98
 
     SSD (SATA) 
-    Disks_for_capacity = 160ТБ / 20ТБ = 8
-    Disks_for_throughput = 5,1 МБ/с / 500 МБ/с = 0.01
+    Disks_for_capacity = 18.3 ТB / 2ТБ = 9.15
+    Disks_for_throughput = 5,42 MB/s / 500 МБ/с = 0.01
     Disks_for_iops = 9750 / 1000 = 9.750
-    Disks = max(ceil(8), ceil(0.01), ceil(9.750)) = 9
+    Disks = max(ceil(9.15), ceil(0.01), ceil(9.750)) = 10
 
     SSD (nVME)
-    Disks_for_capacity = 160ТБ / 30ТБ = 5.3
-    Disks_for_throughput = 5,1 МБ/с / 3000 МБ/с = 0.0001
+    Disks_for_capacity = 18.3 ТB / 20ТБ = 0.915
+    Disks_for_throughput = 5,42 MB/s / 3000 МБ/с = 0.0001
     Disks_for_iops = 9750 / 10000 = 0.975
-    Disks = max(ceil(5.3), ceil(0.0001), ceil(0.975)) = 6
+    Disks = max(ceil(0.915), ceil(0.0001), ceil(0.975)) = 1
 
-Предпочтительная система ранения SSD (nVME) из 6 дисков по 30 ГБ
+Предпочтительная система ранения SSD (nVME) из 1 диска 20 ГБ
 
 #### Реакции
 RPS (запись) оценка постов:
 
     RPS ~= 1750 
-    Traffic = 1750 * 40 ~= 0.07 MB/s
+    Traffic = 1750 * 64 B ~= 0.112 MB/s
+
+RPS (чтение) оценки постов:
+
+    RPS ~= 7230 (7000 RPS лента постов + 230 RPS поиск пользователей) 
+    Traffic = 7230 * 64 ~= 0.462 MB/s
 
 Итого трафик:
 
-    Traffic: 0.07 MB/s
-    IOPS: 1750
-    Capacity: 0.07 * 86400 * 365 = 2.2 TB
+    Traffic: 0.574 MB/s
+    IOPS: 8980
+    Capacity: 0.112 MB/s * 86400 * 365 = 3.53 TB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 2.2ТБ / 1ТБ = 2.2
-    Disks_for_throughput = 0.07 МБ/с / 100 МБ/с = 0.0007
-    Disks_for_iops = 1750 / 100 = 17.50
-    Disks = max(ceil(2.2), ceil(0.0007), ceil(17.50)) = 18
+    Disks_for_capacity = 3.53 TB / 2ТБ = 1.765
+    Disks_for_throughput = 0.574 MB/s / 100 МБ/с = 0.00574
+    Disks_for_iops = 8980 / 100 = 89.80
+    Disks = max(ceil(1.765), ceil(0.00574), ceil(89.80)) = 90
 
     SSD (SATA) 
-    Disks_for_capacity = 2.2ТБ / 2ТБ = 1.1
-    Disks_for_throughput = 0.07 МБ/с / 500 МБ/с = 0.00014
-    Disks_for_iops = 1750 / 1000 = 1.750
-    Disks = max(ceil(1.1), ceil(0.00014), ceil(1.750)) = 2
+    Disks_for_capacity = 3.53 TB / 2ТБ = 1.765
+    Disks_for_throughput = 0.574 MB/s / 500 МБ/с = 0.0011
+    Disks_for_iops = 8980 / 1000 = 8.980
+    Disks = max(ceil(1.765), ceil(0.0011), ceil(8.980)) = 9
 
     SSD (nVME)
-    Disks_for_capacity = 2.2ТБ / 2ТБ = 1.1
-    Disks_for_throughput = 0.07 МБ/с / 3000 МБ/с = 0.00002
-    Disks_for_iops = 1750 / 10000 = 0.1750
-    Disks = max(ceil(1.1), ceil(0.00002), ceil(0.1750)) = 2
+    Disks_for_capacity = 3.53 TB / 4ТБ = 0.8825
+    Disks_for_throughput = 0.574 MB/s / 3000 МБ/с = 0.0001
+    Disks_for_iops = 8980 / 10000 = 0.8980
+    Disks = max(ceil(0.8825), ceil(0.0001), ceil(0.8980)) = 1
 
-Предпочтительная система ранения SSD (SATA) из 2 дисков по 2 ГБ
+Предпочтительная система ранения SSD (SATA) из 1 диска 4 ГБ
 
-#### Подписки
-RPS (запись) подписка на пользователей:
+#### Локации
+Запись:
 
-    RPS ~= 50 
-    Traffic = 50 * 24 ~= 1.2 KB/s
+    RPS ~= 2314 (добавление с постами)
+    Traffic = 2314 * 172 B ~= 0.398 MB/s
+
+Чтение:
+
+    RPS = 115 (поиск по местам) + 7000 (лента постов) = 7115
+    Traffic = 7115 * 172 B ~= 1.223 MB/s
 
 Итого траффик:
 
-    Traffic: 1.2 KB/s
-    IOPS: 50
-    Capacity: 1.2 * 86400 * 365 = 38 GB
+    Traffic: 1.621 MB/s
+    IOPS: 9429
+    Capacity: 1.621 MB/s * 86400 * 365 = 12.55 ТB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 38GB / 40GB = 0.95
-    Disks_for_throughput = 0.0012 МБ/с/ 100 МБ/с = 0.000012 
-    Disks_for_iops = 50 / 100 = 0.5
-    Disks = max(ceil(0.95), ceil(0.000012), ceil(0.5)) = 1
+    Disks_for_capacity = 12.55 ТB / 2GB = 6.2
+    Disks_for_throughput = 1.621 MB/s / 100 МБ/с = 0.01621
+    Disks_for_iops = 9429 / 100 = 94.29
+    Disks = max(ceil(6.2), ceil(0.01621), ceil(94.29)) = 95
 
     SSD (SATA) 
-    Disks_for_capacity = 38GB / 40GB = 0.95
-    Disks_for_throughput = 0.0012 МБ/с / 500 МБ/с = 0.0000024
-    Disks_for_iops = 50 / 1000 = 0.05
-    Disks = max(ceil(0.95), ceil(0.0000024), ceil(0.05)) = 1
+    Disks_for_capacity = 12.55 ТB / 2GB = 6.2
+    Disks_for_throughput = 1.621 MB/s / 500 МБ/с = 0.003
+    Disks_for_iops = 9429 / 1000 = 9.429
+    Disks = max(ceil(6.2), ceil(0.003), ceil(9.429)) = 10
 
     SSD (nVME)
-    Disks_for_capacity = 38GB / 40GB = 0.95
-    Disks_for_throughput = 0.0012 МБ/с / 3000 МБ/с = 0.0000004
-    Disks_for_iops = 50 / 10000 = 0.005
-    Disks = max(ceil(0.95), ceil(0.0000004), ceil(0.005)) = 1
+    Disks_for_capacity = 12.55 ТB / 15 GB = 0.83
+    Disks_for_throughput = 1.621 MB/s / 3000 МБ/с = 0.0005
+    Disks_for_iops = 9429 / 10000 = 0.9429
+    Disks = max(ceil(0.83), ceil(0.0005), ceil(0.9429)) = 1
 
-Предпочтительная система ранения HDD из 1 диска по 40 ГБ
+Предпочтительная система ранения SSD (nVME) из 1 диска 15 ГБ
 
-#### Поиск
-RPS (чтение) поиск популярных мест:
+#### Пользователи
+Запись:
 
-    RPS ~= 115
-    Traffic = 115 * 732 ~= 84 KB/s
+    RPS ~= 0.32 
+    Traffic = 0.32 * 0.8 MB/s ~= 0.256 MB/s
 
-RPS (чтение) поиск пользователей:
+Чтение:
 
-    RPS ~= 230
-    Traffic = 230 * 416 ~= 100 KB/s
+    RPS ~= 230 (поиск) + 7000 RPS лента постов = 7230
+    Traffic = 7230 * 0.8 MB/s ~= 5.784 MB/s
 
 Итого траффик:
 
-    Traffic: 184 KB/s
-    IOPS: 345
-    Capacity: 184 * 86400 * 365 = 5.8 TB
+    Traffic: 6.040 MB/s
+    IOPS: 7230
+    Capacity: 6.040 MB/s * 86400 * 365 = 190 TB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 5.8 / 2ТБ = 2.9
-    Disks_for_throughput = 0.184 МБ/с / 100 МБ/с = 0.00184
-    Disks_for_iops = 345 / 100 = 3.45
-    Disks = max(ceil(2.9), ceil(0.00184), ceil(3.45)) = 4
+    Disks_for_capacity = 190 TB / 4 ТБ = 47.5
+    Disks_for_throughput = 6.040 MB/s / 100 МБ/с = 0.06
+    Disks_for_iops = 7230 / 100 = 72.30
+    Disks = max(ceil(47.5), ceil(0.06), ceil(72.30)) = 73
 
     SSD (SATA) 
-    Disks_for_capacity = 5.8 / 6ТБ = 0.96
-    Disks_for_throughput = 0.184 МБ/с / 500 МБ/с = 0.0003
-    Disks_for_iops = 345 / 1000 = 0.345
-    Disks = max(ceil(0.96), ceil(0.0003), ceil(0.345)) = 1
+    Disks_for_capacity = 190 TB / 20ТБ = 9.5
+    Disks_for_throughput = 6.040 MB/s / 500 МБ/с = 0.012
+    Disks_for_iops = 7230 / 1000 = 7.230
+    Disks = max(ceil(9.5), ceil(0.012), ceil(7.230)) = 10
 
     SSD (nVME)
-    Disks_for_capacity = 5.8 / 6ТБ = 0.96
-    Disks_for_throughput = 0.184 МБ/с / 3000 МБ/с = 0.00006
-    Disks_for_iops = 345 / 10000 = 0.0345
-    Disks = max(ceil(0.96), ceil(0.00006), ceil(0.0345)) = 1
+    Disks_for_capacity = 190 TB / 30ТБ = 6.3
+    Disks_for_throughput = 6.040 MB/s / 3000 МБ/с = 0.002
+    Disks_for_iops = 7230 / 10000 = 0.7230
+    Disks = max(ceil(6.3), ceil(0.002), ceil(0.7230)) = 7
 
-Предпочтительная система ранения SSD (SATA) из 1 диска по 6 ГБ
+Предпочтительная система ранения SSD (SATA) из 10 дисков по 20 ГБ
