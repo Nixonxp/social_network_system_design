@@ -96,7 +96,7 @@ RPS (чтение) поиск пользователей:
 
 ### 4. Оценка дисков:
 #### Оценка на 1 запись по таблицам БД
-Ориентировочно 1 фото в хранилище весит 800 кб
+Ориентировочно 1 фото в хранилище весит 400 кб для постов, 800 для фото пользователей
 
     Table follows {
         following_user_id (16 byte)
@@ -119,9 +119,9 @@ RPS (чтение) поиск пользователей:
         body (1000 byte)
         user_id (16 byte)
         location_id (16 byte)
-        photos (100 * 3 max photos = 300 byte) (2.4Mb - S3 blob storage)
+        photos (100 * 3 max photos = 300 byte) (1.2Mb - S3 blob storage)
         created_at (8 byte)
-    } (1456 byte) - 2.4 Mb with pictures 
+    } (1456 byte) - 1.2 Mb with pictures 
     
     Table ratings {
         id (16 byte)
@@ -152,40 +152,40 @@ RPS (чтение) поиск пользователей:
 Запись:
 
     RPS = 2314
-    Traffic = 2314 * 2.4Mb ~= 5,553 GB/s
+    Traffic = 2314 * 1.2Mb ~= 2.77 GB/s
 
 Чтение:
 
     RPS ~= 7000
-    Traffic = 7000 * 2.4Mb ~= 16.8 GB/s
+    Traffic = 7000 * 1.2Mb ~= 8.4 GB/s
 
 Итого трафик:
 
-    Traffic: 22.353 GB/s
+    Traffic: 11.17 GB/s
     IOPS: 9314
-    Capacity: 5,553 * 86400 * 365 = 175 PB
+    Capacity: 2.77 * 86400 * 365 = 87.5 PB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 175 PB / 32ТБ = 5468.75
-    Disks_for_throughput = 22.353 ГБ/с / 100 МБ/с = 223.53
+    Disks_for_capacity = 87.5 PB / 32ТБ = 2734
+    Disks_for_throughput = 11.17 ГБ/с / 100 МБ/с = 111.7
     Disks_for_iops = 9314 / 100 = 93.14
-    Disks = max(ceil(5468.75), ceil(223.53), ceil(93.14)) = 5469
+    Disks = max(ceil(2734), ceil(111.7), ceil(93.14)) = 2734
 
     SSD (SATA) 
-    Disks_for_capacity = 175 PB / 100ТБ = 1750
-    Disks_for_throughput = 22.353 ГБ/с  / 500 МБ/с = 44.706
+    Disks_for_capacity = 87.5 PB / 100ТБ = 875
+    Disks_for_throughput = 11.17 ГБ/с  / 500 МБ/с = 22.3
     Disks_for_iops = 9314 / 1000 = 9.314
-    Disks = max(ceil(1750), ceil(44.706), ceil(9.314)) = 1750
+    Disks = max(ceil(875), ceil(22.3), ceil(9.314)) = 875
 
     SSD (nVME)
-    Disks_for_capacity = 175 PB / 30ТБ = 5833.3
-    Disks_for_throughput = 22.353 ГБ/с  / 3000 МБ/с = 7.4
+    Disks_for_capacity = 87.5 PB / 30ТБ = 2916.6
+    Disks_for_throughput = 11.17 ГБ/с  / 3000 МБ/с = 3.72
     Disks_for_iops = 9314 / 10000 = 0.9314
-    Disks = max(ceil(5833.3), ceil(7.4), ceil(0.9314)) = 5833.3
+    Disks = max(ceil(2916.6), ceil(3.72), ceil(0.9314)) = 2917
 
-Предпочтительная система ранения SSD (SATA) из 1750 дисков по 100ТБ
+Предпочтительная система ранения SSD (SATA) из 875 дисков по 100ТБ
 
 #### Комментарии
 Запись:
