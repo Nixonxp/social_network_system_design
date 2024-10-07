@@ -135,9 +135,10 @@ RPS (чтение) поиск пользователей:
         id (16 byte)
         user_id (16 byte)
         post_id (16 byte)
+        reply_id (16 byte)
         text (500 byte)
         created_at (8 byte)
-    } (556 byte)
+    } (572 byte)
     
     Table locations {
         id (16 byte)
@@ -190,38 +191,38 @@ RPS (чтение) поиск пользователей:
 Запись:
 
     RPS ~= 1050
-    Traffic = 1050 * 556 B ~= 0,583 MB/s
+    Traffic = 1050 * 572 B ~= 0,6MB/s
 
 Чтение:
 
     RPS ~= 8700
-    Traffic = 8700 * 556 ~= 4,837 MB/s
+    Traffic = 8700 * 572 ~= 4,97 MB/s
 
 Итого трафик:
 
-    Traffic: 5,42 MB/s
+    Traffic: 5,57 MB/s
     IOPS: 9750
-    Capacity: 0,583 MB/s * 86400 * 365 = 18.3 ТB
+    Capacity: 0,6 MB/s * 86400 * 365 = 18.9 ТB
 
 Итого расчет дисков:
 
     HDD 
-    Disks_for_capacity = 18.3 ТB / 2ТБ = 9.15
-    Disks_for_throughput = 5,42 MB/s / 100 МБ/с = 0.0542
+    Disks_for_capacity = 18.9 ТB / 2ТБ = 9.45
+    Disks_for_throughput = 5,57 MB/s / 100 МБ/с = 0.057
     Disks_for_iops = 9750 / 100 = 97.50
-    Disks = max(ceil(9.15), ceil(0.0542), ceil(97.50)) = 98
+    Disks = max(ceil(9.45), ceil(0.057), ceil(97.50)) = 98
 
     SSD (SATA) 
-    Disks_for_capacity = 18.3 ТB / 2ТБ = 9.15
-    Disks_for_throughput = 5,42 MB/s / 500 МБ/с = 0.01
+    Disks_for_capacity = 18.9 ТB / 2ТБ = 9.45
+    Disks_for_throughput = 5,57 MB/s / 500 МБ/с = 0.01
     Disks_for_iops = 9750 / 1000 = 9.750
-    Disks = max(ceil(9.15), ceil(0.01), ceil(9.750)) = 10
+    Disks = max(ceil(9.45), ceil(0.01), ceil(9.750)) = 10
 
     SSD (nVME)
-    Disks_for_capacity = 18.3 ТB / 20ТБ = 0.915
-    Disks_for_throughput = 5,42 MB/s / 3000 МБ/с = 0.0001
+    Disks_for_capacity = 18.9 ТB / 20ТБ = 0.945
+    Disks_for_throughput = 5,57 MB/s / 3000 МБ/с = 0.0001
     Disks_for_iops = 9750 / 10000 = 0.975
-    Disks = max(ceil(0.915), ceil(0.0001), ceil(0.975)) = 1
+    Disks = max(ceil(0.945), ceil(0.0001), ceil(0.975)) = 1
 
 Предпочтительная система ранения SSD (nVME) из 1 диска 20 ГБ
 
