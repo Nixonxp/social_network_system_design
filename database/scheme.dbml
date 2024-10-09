@@ -1,0 +1,69 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table follows {
+  following_user_id uuid
+  followed_user_id uuid
+  created_at timestamp
+}
+
+Table users {
+  id uuid [primary key]
+  first_name varchar
+  last_name varchar
+  email varchar
+  profile_picture varchar
+  created_at timestamp
+}
+
+Table posts {
+  id uuid [primary key]
+  title varchar
+  body text [note: 'Content of the post']
+  user_id uuid
+  location_id uuid
+  photos varchar[]
+  created_at timestamp
+}
+
+Table ratings {
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
+  rating integer [note: 'min:1 max:5']
+  created_at timestamp
+}
+
+Table comments {
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
+  text text
+  created_at timestamp
+}
+
+Table locations {
+  id uuid [primary key]
+  name varchar
+  geometry geometry
+  created_at timestamp
+}
+
+Table blob_storage {
+  data bynary
+}
+
+Ref: posts.user_id > users.id
+Ref: posts.location_id > locations.id
+Ref: posts.photos > blob_storage.data
+
+Ref: users.id < follows.following_user_id
+Ref: users.profile_picture > blob_storage.data
+
+Ref: users.id < follows.followed_user_id
+
+Ref: ratings.user_id > users.id
+Ref: ratings.post_id > posts.id
+
+Ref: comments.user_id > users.id
+Ref: comments.post_id > posts.id
