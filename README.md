@@ -219,10 +219,10 @@ RPS (чтение) поиск пользователей:
     Disks = max(ceil(9.45), ceil(0.01), ceil(9.750)) = 10
 
     SSD (nVME)
-    Disks_for_capacity = 18.9 ТB / 20ТБ = 0.945
+    Disks_for_capacity = 18.9 ТB / 30ТБ = 0.63
     Disks_for_throughput = 5,57 MB/s / 3000 МБ/с = 0.0001
     Disks_for_iops = 9750 / 10000 = 0.975
-    Disks = max(ceil(0.945), ceil(0.0001), ceil(0.975)) = 1
+    Disks = max(ceil(0.63), ceil(0.0001), ceil(0.975)) = 1
 
 Предпочтительная система ранения SSD (nVME) из 1 диска 20 ГБ
 
@@ -330,10 +330,10 @@ RPS (чтение) поиск пользователей:
     Disks = max(ceil(47.5), ceil(0.06), ceil(72.30)) = 73
 
     SSD (SATA) 
-    Disks_for_capacity = 190 TB / 20ТБ = 9.5
+    Disks_for_capacity = 190 TB / 16ТБ = 11.8
     Disks_for_throughput = 6.040 MB/s / 500 МБ/с = 0.012
     Disks_for_iops = 7230 / 1000 = 7.230
-    Disks = max(ceil(9.5), ceil(0.012), ceil(7.230)) = 10
+    Disks = max(ceil(11.8), ceil(0.012), ceil(7.230)) = 12
 
     SSD (nVME)
     Disks_for_capacity = 190 TB / 30ТБ = 6.3
@@ -341,4 +341,4 @@ RPS (чтение) поиск пользователей:
     Disks_for_iops = 7230 / 10000 = 0.7230
     Disks = max(ceil(6.3), ceil(0.002), ceil(0.7230)) = 7
 
-Предпочтительная система ранения SSD (SATA) из 10 дисков по 20 ГБ
+Предпочтительная система ранения SSD (SATA) из 12 дисков по 16 ГБ
