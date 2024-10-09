@@ -152,21 +152,48 @@ RPS (чтение) поиск пользователей:
 Запись:
 
     RPS = 2314
-    Traffic = 2314 * 1.2Mb ~= 2.77 GB/s
+    Traffic metadata = 2314 * 1.456 Kb ~= 3.3 MB/s
+    Traffic media = 2314 * 1.2Mb ~= 2.77 GB/s
 
 Чтение:
 
     RPS ~= 7000
-    Traffic = 7000 * 1.2Mb ~= 8.4 GB/s
+    Traffic metadata = 7000 * 1.456 Kb ~= 10.1 MB/s
+    Traffic media = 7000 * 1.2Mb ~= 8.4 GB/s
 
 Итого трафик:
 
-    Traffic: 11.17 GB/s
+    Traffic metadata: 13.4 MB/s
+    Traffic media: 11.17 GB/s
     IOPS: 9314
-    Capacity: 2.77 * 86400 * 365 = 87.5 PB
+    Capacity metadata: 13.4 MB/s * 86400 * 365 = 422.5 ТB
+    Capacity media: 2.77 GB/s * 86400 * 365 = 87.5 PB
 
 Итого расчет дисков:
 
+    METADATA
+    ---------------
+    HDD 
+    Disks_for_capacity = 422.5 ТB / 32ТБ = 13.1
+    Disks_for_throughput = 13.4 MB/s / 100 МБ/с = 0.134
+    Disks_for_iops = 9314 / 100 = 93.14
+    Disks = max(ceil(13.1), ceil(0.134), ceil(93.14)) = 93.14
+
+    SSD (SATA) 
+    Disks_for_capacity = 422.5 ТB / 100ТБ = 4.22
+    Disks_for_throughput = 13.4 MB/s  / 500 МБ/с = 0.02
+    Disks_for_iops = 9314 / 1000 = 9.314
+    Disks = max(ceil(4.22), ceil(0.02), ceil(9.314)) = 10
+
+    SSD (nVME)
+    Disks_for_capacity = 422.5 ТB / 30ТБ = 14.06
+    Disks_for_throughput = 13.4 MB/s  / 3000 МБ/с = 0.004
+    Disks_for_iops = 9314 / 10000 = 0.9314
+    Disks = max(ceil(14.06), ceil(0.004), ceil(0.9314)) = 15
+
+    ---------------
+    MEDIA
+    ---------------
     HDD 
     Disks_for_capacity = 87.5 PB / 32ТБ = 2734
     Disks_for_throughput = 11.17 ГБ/с / 100 МБ/с = 111.7
@@ -185,7 +212,8 @@ RPS (чтение) поиск пользователей:
     Disks_for_iops = 9314 / 10000 = 0.9314
     Disks = max(ceil(2916.6), ceil(3.72), ceil(0.9314)) = 2917
 
-Предпочтительная система ранения SSD (SATA) из 875 дисков по 100ТБ
+Предпочтительная система ранения метадаты SSD (SATA) из 10 дисков по 100ТБ
+Предпочтительная система ранения медиа SSD (SATA) из 875 дисков по 100ТБ
 
 #### Комментарии
 Запись:
@@ -308,37 +336,65 @@ RPS (чтение) поиск пользователей:
 Запись:
 
     RPS ~= 0.32 
-    Traffic = 0.32 * 0.8 MB/s ~= 0.256 MB/s
+    Traffic metadata = 0.32 * 0.424 KB/s ~= 0.135 KB/s
+    Traffic media = 0.32 * 0.8 MB/s ~= 0.256 MB/s
 
 Чтение:
 
     RPS ~= 230 (поиск) + 7000 RPS лента постов = 7230
-    Traffic = 7230 * 0.8 MB/s ~= 5.784 MB/s
+    Traffic metadata = 7230 * 0.424 KB/s ~= 3.06 MB/s
+    Traffic media = 7230 * 0.8 MB/s ~= 5.784 GB/s
 
 Итого траффик:
 
-    Traffic: 6.040 MB/s
+    Traffic metadata: 3.06 MB/s
+    Traffic media: 5.784 GB/s
     IOPS: 7230
-    Capacity: 6.040 MB/s * 86400 * 365 = 190 TB
+    Capacity metadata: 0.135 KB/s * 86400 * 365 = 4.23 GB
+    Capacity media: 0.256 MB/s * 86400 * 365 = 9.07 Tb
 
 Итого расчет дисков:
 
+    METADATA
+    ---------------
     HDD 
-    Disks_for_capacity = 190 TB / 4 ТБ = 47.5
-    Disks_for_throughput = 6.040 MB/s / 100 МБ/с = 0.06
+    Disks_for_capacity = 4.23 GB / 1 Gb = 4.23
+    Disks_for_throughput =  3.06 MB/s / 100 МБ/с = 0.03
     Disks_for_iops = 7230 / 100 = 72.30
-    Disks = max(ceil(47.5), ceil(0.06), ceil(72.30)) = 73
+    Disks = max(ceil(4.23), ceil(0.03), ceil(72.30)) = 73
 
     SSD (SATA) 
-    Disks_for_capacity = 190 TB / 16ТБ = 11.8
-    Disks_for_throughput = 6.040 MB/s / 500 МБ/с = 0.012
+    Disks_for_capacity = 4.23 GB / 1 GB = 4.23
+    Disks_for_throughput =  3.06 MB/s / 500 МБ/с = 0.006
     Disks_for_iops = 7230 / 1000 = 7.230
-    Disks = max(ceil(11.8), ceil(0.012), ceil(7.230)) = 12
+    Disks = max(ceil(4.23), ceil(0.006), ceil(7.230)) = 8
 
     SSD (nVME)
-    Disks_for_capacity = 190 TB / 30ТБ = 6.3
-    Disks_for_throughput = 6.040 MB/s / 3000 МБ/с = 0.002
+    Disks_for_capacity = 4.23 GB / 8 GB = 0.52
+    Disks_for_throughput =  3.06 MB/s / 3000 МБ/с = 0.001
     Disks_for_iops = 7230 / 10000 = 0.7230
-    Disks = max(ceil(6.3), ceil(0.002), ceil(0.7230)) = 7
+    Disks = max(ceil(0.52), ceil(0.001), ceil(0.7230)) = 1
 
-Предпочтительная система ранения SSD (SATA) из 12 дисков по 16 ГБ
+    ---------------
+    MEDIA
+    ---------------
+    HDD 
+    Disks_for_capacity = 9.07 TB / 1 ТБ = 9.07
+    Disks_for_throughput = 5.784 GB/s / 100 МБ/с = 57.84
+    Disks_for_iops = 7230 / 100 = 72.30
+    Disks = max(ceil(9.07), ceil(57.84), ceil(72.30)) = 73
+
+    SSD (SATA) 
+    Disks_for_capacity = 9.07 TB / 1ТБ = 9.07
+    Disks_for_throughput = 5.784 GB/s / 500 МБ/с = 11.5
+    Disks_for_iops = 7230 / 1000 = 7.230
+    Disks = max(ceil(9.07), ceil(11.5), ceil(7.230)) = 12
+
+    SSD (nVME)
+    Disks_for_capacity = 9.07 TB / 4ТБ = 2.035
+    Disks_for_throughput = 5.784 GB/s / 3000 МБ/с = 1.9
+    Disks_for_iops = 7230 / 10000 = 0.7230
+    Disks = max(ceil(2.035), ceil(1.9), ceil(0.7230)) = 3
+
+Предпочтительная система хранения метадаты SSD (nVME) из 1 диска 8 ГБ
+Предпочтительная система хранения медиа SSD (SATA) из 12 дисков по 1 ТБ
