@@ -1,0 +1,9 @@
+// db type - mongoDB
+
+Table ratings {
+  id uuid [primary key]
+  user_id uuid
+  post_id uuid
+  rating integer [note: 'min:1 max:5']
+  created_at timestamp
+}

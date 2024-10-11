@@ -1,0 +1,8 @@
+// db type - MongoDB
+
+Table locations {
+  id uuid [primary key]
+  name varchar
+  geometry geometry
+  created_at timestamp
+}
