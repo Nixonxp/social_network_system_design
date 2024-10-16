@@ -454,7 +454,7 @@ RPS (чтение) поиск пользователей:
     Replication:
         - master slave / sync / RF 2
     Sharding:
-        - key based by post id = 1 shard by 2 replicas
+        - zone based by geometry = 1 shard by 2 replicas
 
     1 / 1  = 1 * 2 ~= 2 hosts
 
