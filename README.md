@@ -416,9 +416,9 @@ RPS (чтение) поиск пользователей:
     
     MEDIA
     Replication:
-        - master - cdn POP pull/ async / RF 2 CDN
+        - master / RF 2
     Sharding:
-        - 3 shards by 2 CDN replicas
+        - 3 replicas
     
     875 / 3 = 291.6 * 2 ~= 583 hosts
 
@@ -474,8 +474,8 @@ RPS (чтение) поиск пользователей:
     
     MEDIA
     Replication:
-        - master - cdn POP pull / async / RF 2 CDN
+        - master / RF 2
     Sharding:
-        - 3 shards by 2 CDN replicas
+        - 3 shards
     
     12 / 3 = 4 * 2 ~= 8 hosts
