@@ -398,3 +398,84 @@ RPS (чтение) поиск пользователей:
 
 Предпочтительная система хранения метадаты SSD (nVME) из 1 диска 8 ГБ
 Предпочтительная система хранения медиа SSD (SATA) из 12 дисков по 1 ТБ
+
+### 4. Расчет хостов:
+#### Посты
+    RPS запись - 2314
+    RPS чтение - 7000
+    Метадата - 10 дисков
+    Медиа - 875 дисков
+
+    METADATA
+    Replication:
+        - master slave / async / RF 2
+    Sharding:
+        - key based by user id = 3 shards by 2 replicas
+
+    10 / 3  = 3.3 * 2 ~= 7 hosts
+    
+    MEDIA
+    Replication:
+        - master / RF 2
+    Sharding:
+        - 3 replicas
+    
+    875 / 3 = 291.6 * 2 ~= 583 hosts
+
+#### Комментарии
+    RPS запись - 1050
+    RPS чтение - 8700
+    Метадата - 1 диск
+
+    Replication:
+        - master slave / async / RF 2
+    Sharding:
+        - key based by post id = 1 shard by 2 replicas
+
+    1 / 1  = 1 * 2 ~= 2 hosts
+
+#### Реакции
+    RPS запись - 1750
+    RPS чтение - 7230
+    Метадата - 1 диск
+
+    Replication:
+        - master slave / async / RF 2
+    Sharding:
+        - key based by post id = 1 shards by 2 replicas
+
+    1 / 1  = 1 * 2 ~= 2 hosts
+
+#### Локации
+    RPS запись - 2314
+    RPS чтение - 7115
+    Метадата - 1 диск
+
+    Replication:
+        - master slave / sync / RF 2
+    Sharding:
+        - zone based by geometry = 1 shard by 2 replicas
+
+    1 / 1  = 1 * 2 ~= 2 hosts
+
+#### Пользователи
+    RPS запись - 0.32 
+    RPS чтение - 7230
+    Метадата - 1 диск
+    Медиа - 12 дисков
+
+    METADATA
+    Replication:
+        - master slave / sync / RF 2
+    Sharding:
+        - key based by user id - 1 shard by 2 replicas
+
+    1 / 1  = 1 * 2 ~= 2 hosts
+    
+    MEDIA
+    Replication:
+        - master / RF 2
+    Sharding:
+        - 3 shards
+    
+    12 / 3 = 4 * 2 ~= 8 hosts
