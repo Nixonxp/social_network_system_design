@@ -479,3 +479,12 @@ RPS (чтение) поиск пользователей:
         - 3 shards
     
     12 / 3 = 4 * 2 ~= 8 hosts
+
+### 5. Обзор дизайна:
+
+Для наглядности дизайна, используется средство визуализации
+[C4 model](https://c4model.com/)
+
+<p align="center">
+  <img src="images/diagrams/context.png" />
+</p>
