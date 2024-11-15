@@ -1,0 +1,55 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+ContainerQueue(messageQueue, "Events queue", "Kafka", "Message queue for events")
+
+Container(userService, "User Service", "Go", "Handles creation, update and get users", $tags="webApp")
+ContainerDb(userDatabase, "User database", "PgSQL", "Stores users metadata",  $tags="db")
+
+Container(postService, "POST Service", "Go", "Handles creation and update posts", $tags="webApp")
+ContainerDb(postDatabase, "POST database", "MongoDB", "Stores posts metadata",  $tags="db")
+
+Container(feedService, "Feed Service", "Go", "Handles get posts feed for user", $tags="webApp")
+ContainerDb(feedDatabase, "Feed database", "Tarantool", "Stores posts feed metadata",  $tags="db")
+
+Container(commentsService, "Comments Service", "Go", "Handles creation and get comments", $tags="webApp")
+ContainerDb(commentsDatabase, "Comments database", "MongoDB", "Stores comments metadata",  $tags="db")
+
+Container(ratingsService, "Ratings Service", "Go", "Handles creation and get ratings", $tags="webApp")
+ContainerDb(ratingsDatabase, "Ratings database", "MongoDB", "Stores ratings metadata",  $tags="db")
+
+Container(locationsService, "Locations Service", "Go", "Handles creation and get locations", $tags="webApp")
+ContainerDb(locationsDatabase, "Locations database", "MongoDB", "Stores locations metadata",  $tags="db")
+
+Container(followsService, "Follows Service", "Go", "Handles creation and get follows", $tags="webApp")
+ContainerDb(followsDatabase, "Follows database", "MongoDB", "Stores follows metadata",  $tags="db")
+
+Container(storageService, "Storage Service", "Go", "Handles creation and get files", $tags="webApp")
+ContainerDb(storageDatabase, "Storage database", "S3", "Stores files",  $tags="db")
+
+Rel(user, loadBalancer, "Handles commands to service", "REST")
+
+Rel(loadBalancer, userService, "Get, create and update users", "REST")
+Rel(loadBalancer, postService, "Get, create and update posts", "REST")
+Rel(loadBalancer, commentsService, "Get and create comments", "REST")
+Rel(loadBalancer, ratingsService, "Get and create ratings", "REST")
+Rel(loadBalancer, locationsService, "Get and create locations", "REST")
+Rel(loadBalancer, followsService, "Get and create follows", "REST")
+Rel(loadBalancer, storageService, "Get and create files", "REST")
+Rel(loadBalancer, feedService, "Get user posts feed", "REST")
+
+Rel(userService, userDatabase, "Handles creation, update and get users")
+Rel(postService, messageQueue, "Send created and updated posts")
+Rel(postService, postDatabase, "Handles creation and update posts")
+Rel(feedService, feedDatabase, "Handles creation and update posts")
+Rel(feedService, messageQueue, "Get created/updated posts and follows to generate feed for users")
+Rel(feedService, followsService, "Get user follow info for generate posts feed")
+Rel(commentsService, commentsDatabase, "Handles creation and get comments")
+Rel(ratingsService, ratingsDatabase, "Handles creation and get reactions")
+Rel(locationsService, locationsDatabase, "Handles creation and get locations")
+Rel(followsService, followsDatabase, "Handles creation and get follows")
+Rel(storageService, storageDatabase, "Handles creation and get files")
+Rel(followsService, messageQueue, "Send user follows data for update feed")
+@enduml
